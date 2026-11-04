@@ -33,4 +33,21 @@ jupyter notebook
 
 On macOS or Linux, activate the environment with `source .venv/bin/activate`.
 
-The quiz is not playable yet. This repository currently contains the project layout only.
+## Country table
+
+From the repository root, with the environment activated:
+
+```bash
+# Windows PowerShell
+$env:PYTHONPATH = "src"
+python -m globe_quiz.io_countries
+```
+
+```bash
+# macOS or Linux
+PYTHONPATH=src python -m globe_quiz.io_countries
+```
+
+The first run downloads `data/raw/countries.json`. Later runs read that file. The table has one row per country: name, ISO code, capital, region, subregion, languages, currencies, borders, coordinates, and flag. Countries with several capitals keep the full list; the `capital` column is the first one.
+
+The quiz itself is not playable yet.
