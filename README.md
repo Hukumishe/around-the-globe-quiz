@@ -50,4 +50,19 @@ PYTHONPATH=src python -m globe_quiz.io_countries
 
 The first run downloads `data/raw/countries.json`. Later runs read that file. The table has one row per country: name, ISO code, capital, region, subregion, languages, currencies, borders, coordinates, and flag. Countries with several capitals keep the full list; the `capital` column is the first one.
 
+## World Bank indicators
+
+```bash
+# Windows PowerShell
+$env:PYTHONPATH = "src"
+python -m globe_quiz.io_worldbank
+```
+
+```bash
+# macOS or Linux
+PYTHONPATH=src python -m globe_quiz.io_worldbank
+```
+
+The first run asks the World Bank API for 2000–2026, page by page, and saves four files under `data/cache/worldbank/`: population (`SP.POP.TOTL`), GDP (`NY.GDP.MKTP.CD`), GDP per capita (`NY.GDP.PCAP.CD`), and life expectancy (`SP.DYN.LE00.IN`). The API returns only years it has published. Later runs read those files. Each row is one country, region, or income group, one indicator, and one year. A failed page is requested again. The latest non-empty year for each country is chosen in a later step.
+
 The quiz itself is not playable yet.
