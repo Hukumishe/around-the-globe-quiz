@@ -63,6 +63,21 @@ python -m globe_quiz.io_worldbank
 PYTHONPATH=src python -m globe_quiz.io_worldbank
 ```
 
-The first run asks the World Bank API for 2000–2026, page by page, and saves four files under `data/cache/worldbank/`: population (`SP.POP.TOTL`), GDP (`NY.GDP.MKTP.CD`), GDP per capita (`NY.GDP.PCAP.CD`), and life expectancy (`SP.DYN.LE00.IN`). The API returns only years it has published. Later runs read those files. Each row is one country, region, or income group, one indicator, and one year. A failed page is requested again. The latest non-empty year for each country is chosen in a later step.
+The first run asks the World Bank API for 2000–2026, page by page, and saves four files under `data/cache/worldbank/`: population (`SP.POP.TOTL`), GDP (`NY.GDP.MKTP.CD`), GDP per capita (`NY.GDP.PCAP.CD`), and life expectancy (`SP.DYN.LE00.IN`). The API returns only years it has published. Later runs read those files. Each row is one country, region, or income group, one indicator, and one year. A failed page is requested again.
+
+## Joined country table
+
+```bash
+# Windows PowerShell
+$env:PYTHONPATH = "src"
+python -m globe_quiz.cleaning
+```
+
+```bash
+# macOS or Linux
+PYTHONPATH=src python -m globe_quiz.cleaning
+```
+
+Countries are joined to the indicators on `cca3`. Kosovo is the exception: the country file calls it `UNK`, and the World Bank calls it `XKX`. For each indicator, the value is the latest year that is not empty, so population and GDP of the same country may come from different years. A country is dropped when the World Bank has no series for it, or when one of the four indicators is missing. The command prints how many rows were dropped. Income groups and World Bank regions are not countries, so they stay out of the table.
 
 The quiz itself is not playable yet.
