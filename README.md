@@ -80,4 +80,29 @@ PYTHONPATH=src python -m globe_quiz.cleaning
 
 Countries are joined to the indicators on `cca3`. Kosovo is the exception: the country file calls it `UNK`, and the World Bank calls it `XKX`. For each indicator, the value is the latest year that is not empty, so population and GDP of the same country may come from different years. A country is dropped when the World Bank has no series for it, or when one of the four indicators is missing. The command prints how many rows were dropped. Income groups and World Bank regions are not countries, so they stay out of the table.
 
+## Country similarity
+
+```bash
+# Windows PowerShell
+$env:PYTHONPATH = "src"
+python -m globe_quiz.similarity
+```
+
+```bash
+# macOS or Linux
+PYTHONPATH=src python -m globe_quiz.similarity
+```
+
+Every pair of kept countries gets a score from 0 to 1. A country compared with itself scores 1. The score is a weighted sum of five parts:
+
+| Part | Weight | What is close |
+| --- | ---: | --- |
+| Geography | 0.25 | Great-circle distance, with a fifth of this part reserved for a shared subregion |
+| Economy | 0.25 | Ratio of GDP per capita |
+| Demography | 0.20 | Life expectancy and population, in equal parts |
+| Language | 0.15 | Share of official language names (Jaccard) |
+| Currency | 0.15 | At least one currency name in common |
+
+Distance uses the haversine formula and an Earth radius of 6371 km. A gap of 4000 km, or of 10 years of life expectancy, brings that piece down to about 0.37. Micronesia has no currency in the source file, so it shares a currency with nobody; it still scores 1 against itself.
+
 The quiz itself is not playable yet.
