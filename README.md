@@ -105,4 +105,19 @@ Every pair of kept countries gets a score from 0 to 1. A country compared with i
 
 Distance uses the haversine formula and an Earth radius of 6371 km. A gap of 4000 km, or of 10 years of life expectancy, brings that piece down to about 0.37. Micronesia has no currency in the source file, so it shares a currency with nobody; it still scores 1 against itself.
 
+## Wrong answers
+
+```bash
+# Windows PowerShell
+$env:PYTHONPATH = "src"
+python -m globe_quiz.distractors
+```
+
+```bash
+# macOS or Linux
+PYTHONPATH=src python -m globe_quiz.distractors
+```
+
+A question offers three wrong answers. Easy answers are drawn from the least similar 30 percent of countries. Medium uses percentiles 40 to 70. Hard uses the most similar 20 percent, from percentile 80 upward. Countries that would also be correct, such as another capital or a real neighbour, can be left out of the draw. If fewer than three countries remain in the band, easy extends toward more similar countries, hard extends toward less similar ones, and medium extends both ways, five percentiles at a time. The recorded difficulty is the average similarity of the three answers that were drawn.
+
 The quiz itself is not playable yet.
