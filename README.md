@@ -137,4 +137,21 @@ Three kinds of question use the same shape: one prompt, four different options, 
 
 Flag questions show the flag emoji from the country file and ask for the country name. The file does not contain flag images. Population questions show a rounded figure: billions and millions for large countries, thousands for smaller ones. A hard population question stays near the true figure, within a factor of two when three such countries exist, and that factor grows for countries the size of China or India. An easy question uses a figure at least ten times larger or smaller. Neighbour questions use land borders. The correct option is one neighbour, and the other three countries do not share a land border with the subject. Countries with no land border, including islands and Australia, are not asked.
 
-The quiz itself is not playable yet.
+## Score
+
+```bash
+# Windows PowerShell
+$env:PYTHONPATH = "src"
+python -m globe_quiz.scoring
+python -m globe_quiz.scoring play
+```
+
+```bash
+# macOS or Linux
+PYTHONPATH=src python -m globe_quiz.scoring
+PYTHONPATH=src python -m globe_quiz.scoring play
+```
+
+A correct answer scores `1 + difficulty`, where difficulty is the average similarity of the three wrong answers. A wrong answer scores 0. The session score is `100 * earned / maximum`. Missing a hard question therefore costs more than missing an easy one.
+
+Three questions with difficulties 0.2 (correct), 0.8 (wrong), and 0.5 (correct) score `100 * 2.7 / 4.5 = 60`. If the easy question is the one that is missed, the score is `100 * 3.3 / 4.5 = 73.3`. `play` asks five questions in the terminal and appends them to `data/results/attempts.csv`. That file is not committed.

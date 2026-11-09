@@ -18,6 +18,7 @@ dist/
 # Downloaded and cached data
 data/raw/
 data/cache/
+data/results/
 
 # OS and editors
 .DS_Store
