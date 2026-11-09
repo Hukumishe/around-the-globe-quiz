@@ -135,4 +135,6 @@ PYTHONPATH=src python -m globe_quiz.quiz
 
 Three kinds of question use the same shape: one prompt, four different options, and one correct answer. The option shown for a country is its first capital, first official language, or first currency. Any other capital, language, or currency of the country being asked about is also treated as correct, so it is not used as a wrong answer. South Africa is asked with Pretoria, and Bloemfontein and Cape Town are not offered as mistakes. Macau has no capital, and Micronesia has no currency, so those questions are skipped.
 
+Flag questions show the flag emoji from the country file and ask for the country name. The file does not contain flag images. Population questions show a rounded figure: billions and millions for large countries, thousands for smaller ones. A hard population question stays near the true figure, within a factor of two when three such countries exist, and that factor grows for countries the size of China or India. An easy question uses a figure at least ten times larger or smaller. Neighbour questions use land borders. The correct option is one neighbour, and the other three countries do not share a land border with the subject. Countries with no land border, including islands and Australia, are not asked.
+
 The quiz itself is not playable yet.
