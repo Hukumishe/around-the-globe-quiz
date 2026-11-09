@@ -120,4 +120,19 @@ PYTHONPATH=src python -m globe_quiz.distractors
 
 A question offers three wrong answers. Easy answers are drawn from the least similar 30 percent of countries. Medium uses percentiles 40 to 70. Hard uses the most similar 20 percent, from percentile 80 upward. Countries that would also be correct, such as another capital or a real neighbour, can be left out of the draw. If fewer than three countries remain in the band, easy extends toward more similar countries, hard extends toward less similar ones, and medium extends both ways, five percentiles at a time. The recorded difficulty is the average similarity of the three answers that were drawn.
 
+## Questions
+
+```bash
+# Windows PowerShell
+$env:PYTHONPATH = "src"
+python -m globe_quiz.quiz
+```
+
+```bash
+# macOS or Linux
+PYTHONPATH=src python -m globe_quiz.quiz
+```
+
+Three kinds of question use the same shape: one prompt, four different options, and one correct answer. The option shown for a country is its first capital, first official language, or first currency. Any other capital, language, or currency of the country being asked about is also treated as correct, so it is not used as a wrong answer. South Africa is asked with Pretoria, and Bloemfontein and Cape Town are not offered as mistakes. Macau has no capital, and Micronesia has no currency, so those questions are skipped.
+
 The quiz itself is not playable yet.
