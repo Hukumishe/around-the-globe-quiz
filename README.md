@@ -155,3 +155,18 @@ PYTHONPATH=src python -m globe_quiz.scoring play
 A correct answer scores `1 + difficulty`, where difficulty is the average similarity of the three wrong answers. A wrong answer scores 0. The session score is `100 * earned / maximum`. Missing a hard question therefore costs more than missing an easy one.
 
 Three questions with difficulties 0.2 (correct), 0.8 (wrong), and 0.5 (correct) score `100 * 2.7 / 4.5 = 60`. If the easy question is the one that is missed, the score is `100 * 3.3 / 4.5 = 73.3`. `play` asks five questions in the terminal and appends them to `data/results/attempts.csv`. That file is not committed.
+
+## Difficulty check
+
+```bash
+# Windows PowerShell
+$env:PYTHONPATH = "src"
+python -m globe_quiz.check_difficulty
+```
+
+```bash
+# macOS or Linux
+PYTHONPATH=src python -m globe_quiz.check_difficulty
+```
+
+For each country the command draws three easy wrong answers and three hard ones from the same random start. It prints both sets for France, then counts how often the hard set is more similar to the correct country than the easy set.
