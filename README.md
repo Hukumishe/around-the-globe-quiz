@@ -170,3 +170,18 @@ PYTHONPATH=src python -m globe_quiz.check_difficulty
 ```
 
 For each country the command draws three easy wrong answers and three hard ones from the same random start. It prints both sets for France, then counts how often the hard set is more similar to the correct country than the easy set.
+
+## Plots
+
+```bash
+# Windows PowerShell
+$env:PYTHONPATH = "src"
+python -m globe_quiz.plotting
+```
+
+```bash
+# macOS or Linux
+PYTHONPATH=src python -m globe_quiz.plotting
+```
+
+The command writes two charts to `figures/`. `countries_by_region.png` counts the countries that remain in the quiz. `missing_indicators.png` counts empty World Bank rows for population, GDP, GDP per capita, and life expectancy. Each indicator has 6916 rows for 2000–2025.
