@@ -184,4 +184,4 @@ python -m globe_quiz.plotting
 PYTHONPATH=src python -m globe_quiz.plotting
 ```
 
-The command writes two charts to `figures/`. `countries_by_region.png` counts the countries that remain in the quiz. `missing_indicators.png` counts empty World Bank rows for population, GDP, GDP per capita, and life expectancy. Each indicator has 6916 rows for 2000–2025.
+The command writes three charts to `figures/`. `countries_by_region.png` counts the countries that remain in the quiz. `missing_indicators.png` counts empty World Bank rows for population, GDP, GDP per capita, and life expectancy. Each indicator has 6916 rows for 2000–2025. `difficulty_bands.png` shows the mean similarity of the three wrong answers for an easy, a medium, and a hard draw. The hard box sits above the easy box.
