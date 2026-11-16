@@ -144,17 +144,19 @@ Flag questions show the flag emoji from the country file and ask for the country
 $env:PYTHONPATH = "src"
 python -m globe_quiz.scoring
 python -m globe_quiz.scoring play
+python -m globe_quiz.scoring history
 ```
 
 ```bash
 # macOS or Linux
 PYTHONPATH=src python -m globe_quiz.scoring
 PYTHONPATH=src python -m globe_quiz.scoring play
+PYTHONPATH=src python -m globe_quiz.scoring history
 ```
 
 A correct answer scores `1 + difficulty`, where difficulty is the average similarity of the three wrong answers. A wrong answer scores 0. The session score is `100 * earned / maximum`. Missing a hard question therefore costs more than missing an easy one.
 
-Three questions with difficulties 0.2 (correct), 0.8 (wrong), and 0.5 (correct) score `100 * 2.7 / 4.5 = 60`. If the easy question is the one that is missed, the score is `100 * 3.3 / 4.5 = 73.3`. `play` asks five questions in the terminal and appends them to `data/results/attempts.csv`. That file is not committed.
+Three questions with difficulties 0.2 (correct), 0.8 (wrong), and 0.5 (correct) score `100 * 2.7 / 4.5 = 60`. If the easy question is the one that is missed, the score is `100 * 3.3 / 4.5 = 73.3`. `play` asks five questions in the terminal and appends them to `data/results/attempts.csv`. That file is not committed. `history` reads it back and, once a quiz has been played, writes `figures/score_history.png` with one bar per session.
 
 ## Difficulty check
 

@@ -11,9 +11,10 @@ from __future__ import annotations
 import sys
 from datetime import datetime
 from pathlib import Path
-from random import choice
+from random import choice as random_choice
 
 import pandas as pd
+import matplotlib.pyplot as plt
 
 from globe_quiz.cleaning import build_country_table
 from globe_quiz.io_countries import project_root
@@ -116,6 +117,97 @@ def append_attempt(attempt: pd.DataFrame, path: Path | None = None) -> Path:
     return destination
 
 
+def load_attempts(path: Path | None = None) -> pd.DataFrame:
+    """Read saved quiz rows. A missing file gives an empty table.
+
+    Parameters
+    ----------
+    path : pathlib.Path, optional
+        CSV file. Defaults to ``data/results/attempts.csv``.
+
+    Returns
+    -------
+    pandas.DataFrame
+        One row per answered question, or an empty frame with the usual columns.
+    """
+    destination = path or attempts_path()
+    if not destination.exists():
+        return pd.DataFrame(columns=COLUMNS)
+    return pd.read_csv(destination)
+
+
+def session_scores(attempts: pd.DataFrame) -> pd.DataFrame:
+    """Turn question rows into one score per session.
+
+    Parameters
+    ----------
+    attempts : pandas.DataFrame
+        Rows written by ``play``. Several rows can share a ``session_id``.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Columns ``session_id`` and ``score``. Empty when nothing has been saved.
+    """
+    if attempts.empty:
+        return pd.DataFrame(columns=["session_id", "score"])
+    rows = []
+    for session_id, group in attempts.groupby("session_id", sort=False):
+        results = [
+            (str(correct).lower() == "true", float(difficulty))
+            for correct, difficulty in zip(group["correct"], group["realized_difficulty"])
+        ]
+        rows.append({"session_id": session_id, "score": session_score(results)})
+    return pd.DataFrame(rows)
+
+
+def plot_score_history(summary: pd.DataFrame, path: Path) -> Path:
+    """Save one bar per saved session.
+
+    Parameters
+    ----------
+    summary : pandas.DataFrame
+        Output of ``session_scores``.
+    path : pathlib.Path
+        Where to write the PNG file.
+
+    Returns
+    -------
+    pathlib.Path
+        The file that was written.
+
+    Raises
+    ------
+    RuntimeError
+        There are no sessions to plot.
+    """
+    if summary.empty:
+        raise RuntimeError("No saved sessions to plot")
+    labels = [str(number) for number in range(1, len(summary) + 1)]
+    figure, axis = plt.subplots(figsize=(8, 4))
+    axis.bar(labels, summary["score"].to_numpy())
+    axis.set_ylim(0, 100)
+    axis.set_xlabel("Session")
+    axis.set_ylabel("Score")
+    axis.set_title("Quiz scores")
+    figure.tight_layout()
+    figure.savefig(path)
+    plt.close(figure)
+    return path
+
+
+def show_history() -> None:
+    """Print the saved scores and write ``figures/score_history.png`` when any exist."""
+    summary = session_scores(load_attempts())
+    if summary.empty:
+        print("No saved sessions yet. Run: python -m globe_quiz.scoring play")
+        return
+    print(summary.to_string(index=False))
+    directory = project_root() / "figures"
+    directory.mkdir(parents=True, exist_ok=True)
+    print(plot_score_history(summary, directory / "score_history.png"))
+
+
 def _read_choice() -> int:
     """Ask for 1, 2, 3, or 4 and return the matching option index."""
     while True:
@@ -156,7 +248,7 @@ def play(n: int = 5, difficulty: str = "medium", kind: str | None = None) -> flo
         codes = list(countries_for(countries, question_kind))
         if not codes:
             raise RuntimeError(f"No countries available for {question_kind}")
-        country_code = choice(codes)
+        country_code = random_choice(codes)
         question = generate_question(
             countries,
             scores,
@@ -168,8 +260,8 @@ def play(n: int = 5, difficulty: str = "medium", kind: str | None = None) -> flo
         print(question.prompt)
         for index, option in enumerate(question.options, start=1):
             print(f"  {index}. {option}")
-        choice = _read_choice()
-        correct = question.options[choice] == question.answer
+        selected = _read_choice()
+        correct = question.options[selected] == question.answer
         outcomes.append((correct, question.realized_difficulty))
         earned, maximum = question_points(correct, question.realized_difficulty)
         if correct:
@@ -196,9 +288,12 @@ def play(n: int = 5, difficulty: str = "medium", kind: str | None = None) -> flo
 
 
 def main() -> None:
-    """Print the worked example. Pass ``play`` to answer questions."""
+    """Print the worked example. Pass ``play`` to answer, or ``history`` to read scores."""
     if len(sys.argv) > 1 and sys.argv[1] == "play":
         play()
+        return
+    if len(sys.argv) > 1 and sys.argv[1] == "history":
+        show_history()
         return
     missed_hard = session_score([(True, 0.2), (False, 0.8), (True, 0.5)])
     missed_easy = session_score([(False, 0.2), (True, 0.8), (True, 0.5)])
