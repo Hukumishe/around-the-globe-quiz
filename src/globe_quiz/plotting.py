@@ -23,7 +23,18 @@ INDICATOR_ORDER = list(INDICATORS.values())
 
 
 def figures_dir(root: Path | None = None) -> Path:
-    """Return the ``figures`` directory, creating it when it is missing."""
+    """Return the ``figures`` directory, creating it when it is missing.
+
+    Parameters
+    ----------
+    root : pathlib.Path, optional
+        Repository root. Defaults to ``project_root``.
+
+    Returns
+    -------
+    pathlib.Path
+        Directory where the PNG charts are written.
+    """
     directory = (root or project_root()) / "figures"
     directory.mkdir(parents=True, exist_ok=True)
     return directory

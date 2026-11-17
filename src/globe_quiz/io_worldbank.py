@@ -47,14 +47,43 @@ COLUMNS = [
 
 
 def cache_dir(root: Path | None = None) -> Path:
-    """Return ``data/cache/worldbank``, creating it when it is missing."""
+    """Return ``data/cache/worldbank``, creating the directory when it is missing.
+
+    Parameters
+    ----------
+    root : pathlib.Path, optional
+        Repository root. Defaults to ``project_root``.
+
+    Returns
+    -------
+    pathlib.Path
+        Directory for the four indicator cache files.
+    """
     directory = (root or project_root()) / "data" / "cache" / "worldbank"
     directory.mkdir(parents=True, exist_ok=True)
     return directory
 
 
 def cache_path(indicator_id: str, root: Path | None = None) -> Path:
-    """Return the cache file for one indicator."""
+    """Return the cache file for one indicator.
+
+    Parameters
+    ----------
+    indicator_id : str
+        World Bank code, one of ``INDICATORS``.
+    root : pathlib.Path, optional
+        Repository root. Defaults to ``project_root``.
+
+    Returns
+    -------
+    pathlib.Path
+        ``data/cache/worldbank/<indicator_id>.json``.
+
+    Raises
+    ------
+    RuntimeError
+        ``indicator_id`` is not one of the four quiz indicators.
+    """
     if indicator_id not in INDICATORS:
         known = ", ".join(INDICATORS)
         raise RuntimeError(f"Unknown indicator {indicator_id}. Known indicators: {known}")

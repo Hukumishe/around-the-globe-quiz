@@ -37,12 +37,31 @@ COLUMNS = [
 
 
 def project_root() -> Path:
-    """Return the repository root, two levels above this file."""
+    """Return the repository root.
+
+    This file lives in ``src/globe_quiz/``, so the root is two directories up.
+
+    Returns
+    -------
+    pathlib.Path
+        Directory that contains ``src/``, ``data/``, and ``figures/``.
+    """
     return Path(__file__).resolve().parents[2]
 
 
 def raw_data_dir(root: Path | None = None) -> Path:
-    """Return ``data/raw``, creating the directory when it is missing."""
+    """Return ``data/raw``, creating the directory when it is missing.
+
+    Parameters
+    ----------
+    root : pathlib.Path, optional
+        Repository root. Defaults to ``project_root``.
+
+    Returns
+    -------
+    pathlib.Path
+        Directory for the downloaded country file.
+    """
     directory = (root or project_root()) / "data" / "raw"
     directory.mkdir(parents=True, exist_ok=True)
     return directory

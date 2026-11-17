@@ -90,7 +90,18 @@ def session_score(results: list[tuple[bool, float]]) -> float:
 
 
 def attempts_path(root: Path | None = None) -> Path:
-    """Return ``data/results/attempts.csv``, creating the directory if needed."""
+    """Return ``data/results/attempts.csv``, creating the directory if needed.
+
+    Parameters
+    ----------
+    root : pathlib.Path, optional
+        Repository root. Defaults to ``project_root``.
+
+    Returns
+    -------
+    pathlib.Path
+        CSV file of saved answers. The file itself is not committed.
+    """
     directory = (root or project_root()) / "data" / "results"
     directory.mkdir(parents=True, exist_ok=True)
     return directory / "attempts.csv"
@@ -197,7 +208,11 @@ def plot_score_history(summary: pd.DataFrame, path: Path) -> Path:
 
 
 def show_history() -> None:
-    """Print the saved scores and write ``figures/score_history.png`` when any exist."""
+    """Print one score per saved session.
+
+    When at least one session exists, also write ``figures/score_history.png``.
+    When the attempts file is missing, print that no quiz has been played.
+    """
     summary = session_scores(load_attempts())
     if summary.empty:
         print("No saved sessions yet. Run: python -m globe_quiz.scoring play")
