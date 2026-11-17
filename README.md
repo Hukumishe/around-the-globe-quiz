@@ -4,94 +4,65 @@ Geography quiz that builds one multiple-choice question at a time. Each question
 
 This is a project for the Python module of *Coding for Data Science and Data Management* (University of Milan, 2026/27).
 
-## Data
-
-- [World countries](https://github.com/mledoze/countries) — names, capitals, regions, languages, currencies, borders, coordinates, and flags.
-- [World Bank indicators API](https://datahelpdesk.worldbank.org/knowledgebase/articles/889392-about-the-indicators-api-documentation) — population, GDP, GDP per capita, and life expectancy.
-
-Downloads use the Python standard library. Saved files stay outside git (`data/raw/`, `data/cache/`).
-
-## Libraries
-
-NumPy, pandas, Matplotlib, and Jupyter.
-
-## Layout
-
-- `src/globe_quiz/` — data loading, quiz generation, scoring, and plots.
-- `requirements.txt` — pinned libraries.
-
-A Jupyter notebook will import this package to show the plots and run the quiz.
-
 ## Setup
 
 ```bash
 python -m venv .venv
-.venv\Scripts\activate
+```
+
+Activate it with `.venv\Scripts\activate` on Windows, or `source .venv/bin/activate` on macOS and Linux. Then:
+
+```bash
 pip install -r requirements.txt
-jupyter notebook
 ```
 
-On macOS or Linux, activate the environment with `source .venv/bin/activate`.
+The libraries are NumPy, pandas, Matplotlib, and Jupyter. Downloads use the Python standard library.
 
-## Country table
+From the project folder, put the package on the path once per terminal:
 
-From the repository root, with the environment activated:
-
-```bash
-# Windows PowerShell
+```powershell
 $env:PYTHONPATH = "src"
-python -m globe_quiz.io_countries
 ```
 
 ```bash
-# macOS or Linux
-PYTHONPATH=src python -m globe_quiz.io_countries
+export PYTHONPATH=src
 ```
 
-The first run downloads `data/raw/countries.json`. Later runs read that file. The table has one row per country: name, ISO code, capital, region, subregion, languages, currencies, borders, coordinates, and flag. Countries with several capitals keep the full list; the `capital` column is the first one.
+## How to run
 
-## World Bank indicators
+| Command | What it does |
+| --- | --- |
+| `python -m globe_quiz.io_countries` | Download the country file and print the table size |
+| `python -m globe_quiz.io_worldbank` | Download four indicators and print the row counts |
+| `python -m globe_quiz.cleaning` | Join the two tables and print how many countries were dropped |
+| `python -m globe_quiz.similarity` | Print the similarity of France to a few other countries |
+| `python -m globe_quiz.distractors` | Print one easy and one hard set of wrong answers for France |
+| `python -m globe_quiz.quiz` | Print a flag, population, and neighbour question about France |
+| `python -m globe_quiz.scoring` | Print the worked score example |
+| `python -m globe_quiz.scoring play` | Ask five questions in the terminal and save the session |
+| `python -m globe_quiz.scoring history` | Print one score per saved session |
+| `python -m globe_quiz.check_difficulty` | Check that hard wrong answers are more similar than easy ones |
+| `python -m globe_quiz.plotting` | Write the charts in `figures/` |
+| `jupyter notebook notebooks/exploration.ipynb` | Open the presentation notebook |
 
-```bash
-# Windows PowerShell
-$env:PYTHONPATH = "src"
-python -m globe_quiz.io_worldbank
-```
+The notebook calls this package. It does not repeat the loading, the similarity formula, the question rules, or the score.
 
-```bash
-# macOS or Linux
-PYTHONPATH=src python -m globe_quiz.io_worldbank
-```
+## Data
 
-The first run asks the World Bank API for 2000–2026, page by page, and saves four files under `data/cache/worldbank/`: population (`SP.POP.TOTL`), GDP (`NY.GDP.MKTP.CD`), GDP per capita (`NY.GDP.PCAP.CD`), and life expectancy (`SP.DYN.LE00.IN`). The API returns only years it has published. Later runs read those files. Each row is one country, region, or income group, one indicator, and one year. A failed page is requested again.
+- [World countries](https://github.com/mledoze/countries) — names, capitals, regions, languages, currencies, borders, coordinates, and flag emoji. The file has no flag images.
+- [World Bank indicators API](https://datahelpdesk.worldbank.org/knowledgebase/articles/889392-about-the-indicators-api-documentation) — population (`SP.POP.TOTL`), GDP (`NY.GDP.MKTP.CD`), GDP per capita (`NY.GDP.PCAP.CD`), and life expectancy (`SP.DYN.LE00.IN`).
 
-## Joined country table
+The country file is saved in `data/raw/`. The indicators are requested for 2000–2026, page by page, and saved in `data/cache/worldbank/`. A failed page is requested again. The API returns only years it has published. Later runs read the saved files.
 
-```bash
-# Windows PowerShell
-$env:PYTHONPATH = "src"
-python -m globe_quiz.cleaning
-```
+These paths are not committed: `data/raw/`, `data/cache/`, and `data/results/`.
 
-```bash
-# macOS or Linux
-PYTHONPATH=src python -m globe_quiz.cleaning
-```
+## Joined table
 
-Countries are joined to the indicators on `cca3`. Kosovo is the exception: the country file calls it `UNK`, and the World Bank calls it `XKX`. For each indicator, the value is the latest year that is not empty, so population and GDP of the same country may come from different years. A country is dropped when the World Bank has no series for it, or when one of the four indicators is missing. The command prints how many rows were dropped. Income groups and World Bank regions are not countries, so they stay out of the table.
+Countries are joined to the indicators on `cca3`. Kosovo is the exception: the country file calls it `UNK`, and the World Bank calls it `XKX`. The stored code stays `UNK`, because neighbouring countries use that code in their border lists.
 
-## Country similarity
+For each indicator, the value is the latest year that is not empty. Population and GDP of the same country may come from different years. A country is dropped when the World Bank has no series for it, or when one of the four indicators is missing. Income groups and World Bank regions are not countries, so they stay out of the table. The cleaning command prints the counts.
 
-```bash
-# Windows PowerShell
-$env:PYTHONPATH = "src"
-python -m globe_quiz.similarity
-```
-
-```bash
-# macOS or Linux
-PYTHONPATH=src python -m globe_quiz.similarity
-```
+## Similarity
 
 Every pair of kept countries gets a score from 0 to 1. A country compared with itself scores 1. The score is a weighted sum of five parts:
 
@@ -103,97 +74,43 @@ Every pair of kept countries gets a score from 0 to 1. A country compared with i
 | Language | 0.15 | Share of official language names (Jaccard) |
 | Currency | 0.15 | At least one currency name in common |
 
-Distance uses the haversine formula and an Earth radius of 6371 km. A gap of 4000 km, or of 10 years of life expectancy, brings that piece down to about 0.37. Micronesia has no currency in the source file, so it shares a currency with nobody; it still scores 1 against itself.
-
-## Wrong answers
-
-```bash
-# Windows PowerShell
-$env:PYTHONPATH = "src"
-python -m globe_quiz.distractors
-```
-
-```bash
-# macOS or Linux
-PYTHONPATH=src python -m globe_quiz.distractors
-```
-
-A question offers three wrong answers. Easy answers are drawn from the least similar 30 percent of countries. Medium uses percentiles 40 to 70. Hard uses the most similar 20 percent, from percentile 80 upward. Countries that would also be correct, such as another capital or a real neighbour, can be left out of the draw. If fewer than three countries remain in the band, easy extends toward more similar countries, hard extends toward less similar ones, and medium extends both ways, five percentiles at a time. The recorded difficulty is the average similarity of the three answers that were drawn.
+Distance uses the haversine formula and an Earth radius of 6371 km. A gap of 4000 km, or of 10 years of life expectancy, brings that piece down to about 0.37. Micronesia has no currency in the source file, so it shares a currency with nobody. It still scores 1 against itself.
 
 ## Questions
 
-```bash
-# Windows PowerShell
-$env:PYTHONPATH = "src"
-python -m globe_quiz.quiz
-```
+Each question has one prompt, four different options, and one correct answer. Three wrong answers are drawn from a similarity band:
 
-```bash
-# macOS or Linux
-PYTHONPATH=src python -m globe_quiz.quiz
-```
+- easy: the least similar 30 percent
+- medium: percentiles 40 to 70
+- hard: the most similar 20 percent, from percentile 80 upward
 
-Three kinds of question use the same shape: one prompt, four different options, and one correct answer. The option shown for a country is its first capital, first official language, or first currency. Any other capital, language, or currency of the country being asked about is also treated as correct, so it is not used as a wrong answer. South Africa is asked with Pretoria, and Bloemfontein and Cape Town are not offered as mistakes. Macau has no capital, and Micronesia has no currency, so those questions are skipped.
+Countries that would also be a correct answer are left out before the draw. If fewer than three countries remain, easy extends toward more similar countries, hard extends toward less similar ones, and medium extends both ways, five percentiles at a time. The recorded difficulty is the average similarity of the three answers that were drawn, not the name of the band.
 
-Flag questions show the flag emoji from the country file and ask for the country name. The file does not contain flag images. Population questions show a rounded figure: billions and millions for large countries, thousands for smaller ones. A hard population question stays near the true figure, within a factor of two when three such countries exist, and that factor grows for countries the size of China or India. An easy question uses a figure at least ten times larger or smaller. Neighbour questions use land borders. The correct option is one neighbour, and the other three countries do not share a land border with the subject. Countries with no land border, including islands and Australia, are not asked.
+The option shown for a country is its first capital, first official language, or first currency. Any other capital, language, or currency of the country being asked about is also treated as correct, so it is not offered as a mistake. South Africa is asked with Pretoria. Bloemfontein and Cape Town are not offered as wrong answers. Macau has no capital, and Micronesia has no currency, so those questions are skipped.
+
+Flag questions show the flag emoji and ask for the country name. Population questions show a rounded figure: billions and millions for large countries, thousands for smaller ones. A hard population question stays near the true figure, within a factor of two when three such countries exist. That factor grows for countries the size of China or India. An easy question uses a figure at least ten times larger or smaller. Neighbour questions use land borders. The correct option is one neighbour, and the other three countries do not share a land border with the subject. Countries with no land border, including islands and Australia, are not asked.
 
 ## Score
 
-```bash
-# Windows PowerShell
-$env:PYTHONPATH = "src"
-python -m globe_quiz.scoring
-python -m globe_quiz.scoring play
-python -m globe_quiz.scoring history
-```
+A correct answer scores `1 + difficulty`. A wrong answer scores 0. The maximum for a question is also `1 + difficulty`, so a harder question is worth more. The session score is `100 * earned / maximum`.
 
-```bash
-# macOS or Linux
-PYTHONPATH=src python -m globe_quiz.scoring
-PYTHONPATH=src python -m globe_quiz.scoring play
-PYTHONPATH=src python -m globe_quiz.scoring history
-```
+Three questions with difficulties 0.2 (correct), 0.8 (wrong), and 0.5 (correct) score `100 * 2.7 / 4.5 = 60`. If the easy question is the one that is missed, the score is `100 * 3.3 / 4.5 = 73.3`. A completely correct session scores 100.
 
-A correct answer scores `1 + difficulty`, where difficulty is the average similarity of the three wrong answers. A wrong answer scores 0. The session score is `100 * earned / maximum`. Missing a hard question therefore costs more than missing an easy one.
+`play` appends one row per answer to `data/results/attempts.csv`. `history` reads that file and writes `figures/score_history.png`, with one bar per session, after at least one quiz has been played.
 
-Three questions with difficulties 0.2 (correct), 0.8 (wrong), and 0.5 (correct) score `100 * 2.7 / 4.5 = 60`. If the easy question is the one that is missed, the score is `100 * 3.3 / 4.5 = 73.3`. `play` asks five questions in the terminal and appends them to `data/results/attempts.csv`. That file is not committed. `history` reads it back and, once a quiz has been played, writes `figures/score_history.png` with one bar per session.
+## Charts
 
-## Difficulty check
+`python -m globe_quiz.plotting` writes three files:
 
-```bash
-# Windows PowerShell
-$env:PYTHONPATH = "src"
-python -m globe_quiz.check_difficulty
-```
+- `figures/countries_by_region.png` — countries kept in the quiz, by region
+- `figures/missing_indicators.png` — empty World Bank rows for each indicator
+- `figures/difficulty_bands.png` — mean similarity of easy, medium, and hard wrong answers
 
-```bash
-# macOS or Linux
-PYTHONPATH=src python -m globe_quiz.check_difficulty
-```
+The difficulty check prints both sets for France and counts how often the hard set is more similar than the easy set.
 
-For each country the command draws three easy wrong answers and three hard ones from the same random start. It prints both sets for France, then counts how often the hard set is more similar to the correct country than the easy set.
+## Layout
 
-## Plots
-
-```bash
-# Windows PowerShell
-$env:PYTHONPATH = "src"
-python -m globe_quiz.plotting
-```
-
-```bash
-# macOS or Linux
-PYTHONPATH=src python -m globe_quiz.plotting
-```
-
-The command writes three charts to `figures/`. `countries_by_region.png` counts the countries that remain in the quiz. `missing_indicators.png` counts empty World Bank rows for population, GDP, GDP per capita, and life expectancy. Each indicator has 6916 rows for 2000–2025. `difficulty_bands.png` shows the mean similarity of the three wrong answers for an easy, a medium, and a hard draw. The hard box sits above the easy box.
-
-## Notebook
-
-From the project folder:
-
-```bash
-jupyter notebook notebooks/exploration.ipynb
-```
-
-The notebook calls the package. It does not repeat the loading, the similarity formula, the question rules, or the score.
+- `src/globe_quiz/` — the package
+- `notebooks/exploration.ipynb` — the presentation
+- `figures/` — charts written by the commands above
+- `requirements.txt` — pinned libraries
